@@ -1,10 +1,10 @@
-import { FC, useReducer } from "react";
-
+import { FC, useEffect, useReducer } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { EntriesContext, entriesReducer, EntriesActionTypes } from "./";
-
 import { Entry } from "../../interfaces";
+
+import { entriesApi } from "../../apis";
 
 export interface EntriesState {
   entries: Entry[];
@@ -16,39 +16,45 @@ interface EntriesProviderProps {
 }
 
 const ENTRIES_INITIAL_STATE: EntriesState = {
-  entries: [
-    {
-      _id: uuidv4(),
-      description:
-        "Minim exercitation sunt esse magna laboris occaecat Lorem dolore nostrud voluptate nisi aliquip anim.",
-      status: "pending",
-      createdAt: Date.now(),
-    },
-  ],
+  entries: [],
   isAdding: false,
 };
 
 export const EntriesProvider: FC<EntriesProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(entriesReducer, ENTRIES_INITIAL_STATE);
 
-  const addNewEntry = (description: string) => {
-    const newEntry: Entry = {
-      _id: uuidv4(),
-      description,
-      createdAt: Date.now(),
-      status: "pending",
-    };
+  const addNewEntry = async (description: string) => {
+    const { data } = await entriesApi.post<Entry>("/entries", { description });
 
-    dispatch({ type: EntriesActionTypes.ADD, payload: newEntry });
+    dispatch({ type: EntriesActionTypes.ADD, payload: data });
   };
 
   const toggleAddingEntry = (value: boolean) => {
     dispatch({ type: EntriesActionTypes.ADDING, payload: value });
   };
 
-  const updateEntry = (entry: Entry) => {
-    dispatch({ type: EntriesActionTypes.UPDATE, payload: entry });
+  const updateEntry = async ({ _id, description, status }: Entry) => {
+    try {
+      const { data } = await entriesApi.put<Entry>(`/entries/${_id}`, {
+        description,
+        status,
+      });
+
+      dispatch({ type: EntriesActionTypes.UPDATE, payload: data });
+    } catch (err) {
+      console.log(err);
+    }
   };
+
+  const refreshEntries = async () => {
+    const { data } = await entriesApi.get<Entry[]>("/entries");
+
+    dispatch({ type: EntriesActionTypes.REFRESH, payload: data });
+  };
+
+  useEffect(() => {
+    refreshEntries();
+  }, []);
 
   return (
     <EntriesContext.Provider

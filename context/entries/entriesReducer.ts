@@ -6,6 +6,7 @@ export enum EntriesActionTypes {
   DELETE = "[Entries] - Delete",
   ADDING = "[Entries] - Adding",
   UPDATE = "[Entries] - Update",
+  REFRESH = "[Entries] - Refresh",
 }
 
 type EntriesAction =
@@ -20,6 +21,10 @@ type EntriesAction =
   | {
       type: EntriesActionTypes.UPDATE;
       payload: Entry;
+    }
+  | {
+      type: EntriesActionTypes.REFRESH;
+      payload: Entry[];
     };
 
 export const entriesReducer = (
@@ -48,6 +53,11 @@ export const entriesReducer = (
 
           return entry;
         }),
+      };
+    case EntriesActionTypes.REFRESH:
+      return {
+        ...state,
+        entries: [...action.payload],
       };
     default:
       return state;

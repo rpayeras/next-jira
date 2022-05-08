@@ -12,6 +12,9 @@ const mongoConnection = {
 };
 
 export const connect = async () => {
+  if (!process.env.MONGO_URL)
+    throw new Error("MONGO_URL env variable is empty");
+
   if (mongoConnection.isConnected) {
     console.log("Connected already");
     return;
@@ -29,13 +32,20 @@ export const connect = async () => {
   }
 
   await mongoose.connect(process.env.MONGO_URL);
+
   mongoConnection.isConnected = 1;
-  console.log("Connecting to mongo db");
+
+  console.log("Connected to mongo db");
 };
 
 export const disconnect = async () => {
-  if (mongoConnection.isConnected !== 0) return;
+  if (
+    process.env.NODE_ENV === "development" ||
+    mongoConnection.isConnected === 0
+  )
+    return;
 
   await mongoose.disconnect();
   console.log("Disconnecting from mongo db");
+  mongoConnection.isConnected = 0;
 };

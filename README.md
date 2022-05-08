@@ -14,4 +14,10 @@ mongodb://localhost:27017
 
 ## Configure env variables
 
-Rename file .env.template to .env
+Rename file .env.template to .env and fill it with your fields
+
+## Seed database
+
+```bash
+  /api/seed
+```
