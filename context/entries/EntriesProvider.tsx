@@ -6,6 +6,8 @@ import { Entry } from "../../interfaces";
 
 import { entriesApi } from "../../apis";
 
+import { useSnackbar } from "notistack";
+
 export interface EntriesState {
   entries: Entry[];
   isAdding: boolean;
@@ -22,6 +24,7 @@ const ENTRIES_INITIAL_STATE: EntriesState = {
 
 export const EntriesProvider: FC<EntriesProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(entriesReducer, ENTRIES_INITIAL_STATE);
+  const { enqueueSnackbar } = useSnackbar();
 
   const addNewEntry = async (description: string) => {
     const { data } = await entriesApi.post<Entry>("/entries", { description });
@@ -41,6 +44,14 @@ export const EntriesProvider: FC<EntriesProviderProps> = ({ children }) => {
       });
 
       dispatch({ type: EntriesActionTypes.UPDATE, payload: data });
+      enqueueSnackbar("Entry updated", {
+        variant: "success",
+        autoHideDuration: 1500,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
+        },
+      });
     } catch (err) {
       console.log(err);
     }

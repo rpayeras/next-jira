@@ -21,3 +21,10 @@ Rename file .env.template to .env and fill it with your fields
 ```bash
   /api/seed
 ```
+
+## Run project
+
+```bash
+yarn install
+yarn dev
+```

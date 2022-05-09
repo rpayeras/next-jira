@@ -43,7 +43,7 @@ const get = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
   res.status(200).json(entry);
 };
 
-const update = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
+const update = async (req: NextApiRequest, res: NextApiResponse) => {
   const { id } = req.query;
 
   await db.connect();
@@ -65,7 +65,7 @@ const update = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
     // entryToUpdate.status = status;
     // await entryToUpdate.save();
 
-    const updatedEntry = await Entry.findByIdAndUpdate(
+    const updatedEntry: IEntry | null = await Entry.findByIdAndUpdate(
       id,
       {
         description,
@@ -78,11 +78,18 @@ const update = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
     );
 
     await db.disconnect();
+
+    if (!updatedEntry) {
+      return res.status(400).json({ message: "Not found" });
+    }
+
     res.status(200).json(updatedEntry);
-  } catch (err) {
+  } catch (err: any) {
     console.log({ err });
+    const message: string = err.errors.status.message;
 
     await db.disconnect();
-    res.status(400).json({ message: err.errors.status.message });
+
+    res.status(400).json({ message });
   }
 };
