@@ -1,3 +1,5 @@
+import { ChangeEvent, FC, useMemo, useState, useContext } from "react";
+import { GetServerSideProps } from "next";
 import {
   Button,
   Card,
@@ -13,16 +15,22 @@ import {
   RadioGroup,
   capitalize,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
-import { Layout } from "../../components/layouts/Layout";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
-import { Entry, EntryStatus } from "../../interfaces";
 import DeleteOutlineOutlined from "@mui/icons-material/DeleteOutlineOutlined";
-import { ChangeEvent, FC, useMemo, useState, useContext } from "react";
-import { GetServerSideProps } from "next";
+
+import { Layout } from "../../components/layouts/Layout";
+import { Entry, EntryStatus } from "../../interfaces";
+import { dateFunctions } from "../../utils";
+
 import { dbEntries } from "../../database";
 import { EntriesContext } from "../../context/entries";
-import { dateFunctions } from "../../utils";
+import { useRouter } from "next/router";
 
 const validStatus: EntryStatus[] = ["pending", "in-progress", "finished"];
 
@@ -31,10 +39,12 @@ interface Props {
 }
 
 const EntryPage: FC<Props> = ({ entry }) => {
-  const { updateEntry } = useContext(EntriesContext);
+  const { updateEntry, deleteEntry } = useContext(EntriesContext);
   const [description, setDescription] = useState(entry.description);
   const [status, setStatus] = useState<EntryStatus>(entry.status);
   const [touched, setTouched] = useState(false);
+  const [dialogDeleteOpen, setDialogDeleteOpen] = useState(false);
+  const router = useRouter();
 
   const handleFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     setDescription(e.target.value);
@@ -54,6 +64,20 @@ const EntryPage: FC<Props> = ({ entry }) => {
     };
 
     updateEntry(updatedEntry);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteEntry(entry._id);
+    setDialogDeleteOpen(false);
+    router.push("/");
+  };
+
+  const handleOpenDialog = () => {
+    setDialogDeleteOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setDialogDeleteOpen(false);
   };
 
   const isValid = useMemo(
@@ -120,9 +144,27 @@ const EntryPage: FC<Props> = ({ entry }) => {
             right: 30,
             backgroundColor: "error.dark",
           }}
+          onClick={handleOpenDialog}
         >
           <DeleteOutlineOutlined />
         </IconButton>
+
+        <Dialog
+          open={dialogDeleteOpen}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Delete entry?"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              This record will be deleted, are you sure?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancelDelete}>Cancel</Button>
+            <Button onClick={handleConfirmDelete}>Delete</Button>
+          </DialogActions>
+        </Dialog>
       </Grid>
     </Layout>
   );

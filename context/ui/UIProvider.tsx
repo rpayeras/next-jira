@@ -4,6 +4,7 @@ import { UIContext, uiReducer, UIActionTypes } from "./";
 export interface UIState {
   sidemenuOpen: boolean;
   isDraggingEntry: boolean;
+  darkMode: boolean;
 }
 
 interface UIProviderProps {
@@ -13,6 +14,7 @@ interface UIProviderProps {
 const UI_INITIAL_STATE: UIState = {
   sidemenuOpen: false,
   isDraggingEntry: false,
+  darkMode: false,
 };
 
 export const UIProvider: FC<UIProviderProps> = ({ children }) => {
@@ -30,6 +32,10 @@ export const UIProvider: FC<UIProviderProps> = ({ children }) => {
     dispatch({ type: UIActionTypes.IS_DRAGGING_ENTRY, payload: value });
   };
 
+  const toggleDarkMode = () => {
+    dispatch({ type: UIActionTypes.TOGGLE_DARK_THEME });
+  };
+
   return (
     <UIContext.Provider
       value={{
@@ -37,6 +43,7 @@ export const UIProvider: FC<UIProviderProps> = ({ children }) => {
         openSideMenu,
         closeSideMenu,
         setIsDraggingEntry,
+        toggleDarkMode,
       }}
     >
       {children}

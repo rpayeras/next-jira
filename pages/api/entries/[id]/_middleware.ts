@@ -20,10 +20,3 @@ export function middleware(req: NextRequest, ev: NextFetchEvent) {
 
   return NextResponse.next();
 }
-
-// return new Response("Access denied", {
-//   status: 401,
-//   headers: {
-//     "x-token": "Not exists",
-//   },
-// });

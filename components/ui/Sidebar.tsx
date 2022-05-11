@@ -13,8 +13,15 @@ import InboxOutlinedIcon from "@mui/icons-material/InboxOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import { useContext } from "react";
 import { UIContext } from "../../context/ui";
+import Link from "next/link";
 
-const menuItems: string[] = ["Inbox", "Starred", "Send Mail"];
+const menuItems = [
+  {
+    label: "Home",
+    path: "/",
+    icon: "home",
+  },
+];
 
 export const Sidebar = () => {
   const { sidemenuOpen, closeSideMenu } = useContext(UIContext);
@@ -26,24 +33,15 @@ export const Sidebar = () => {
           <Typography variant="h4">Menú</Typography>
         </Box>
         <List>
-          {menuItems.map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 ? <InboxOutlinedIcon /> : <EmailOutlinedIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
-        </List>
-        <Divider />
-        <List>
-          {menuItems.map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 ? <InboxOutlinedIcon /> : <EmailOutlinedIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
+          {menuItems.map(({ label, path }, index) => (
+            <Link href={path} key={label}>
+              <ListItem button>
+                <ListItemIcon>
+                  {index % 2 ? <InboxOutlinedIcon /> : <EmailOutlinedIcon />}
+                </ListItemIcon>
+                <ListItemText primary={label} />
+              </ListItem>
+            </Link>
           ))}
         </List>
       </Box>

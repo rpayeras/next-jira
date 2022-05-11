@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+
 import { db } from "../../../../database";
 import { Entry, IEntry } from "../../../../models";
 
@@ -12,17 +13,13 @@ export default function handle(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  // const { id } = req.query;
-
-  // if (!mongoose.isValidObjectId(id)) {
-  //   return res.status(400).json({ message: "Id not valid" });
-  // }
-
   switch (req.method) {
     case "GET":
       return get(req, res);
     case "PUT":
       return update(req, res);
+    case "DELETE":
+      return deleteRecord(req, res);
 
     default:
       return res.status(400).json({ message: "Endpoint not exists" });
@@ -61,10 +58,6 @@ const update = async (req: NextApiRequest, res: NextApiResponse) => {
   } = req.body;
 
   try {
-    // entryToUpdate.description = description;
-    // entryToUpdate.status = status;
-    // await entryToUpdate.save();
-
     const updatedEntry: IEntry | null = await Entry.findByIdAndUpdate(
       id,
       {
@@ -84,6 +77,40 @@ const update = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     res.status(200).json(updatedEntry);
+  } catch (err: any) {
+    console.log({ err });
+    const message: string = err.errors.status.message;
+
+    await db.disconnect();
+
+    res.status(400).json({ message });
+  }
+};
+
+const deleteRecord = async (req: NextApiRequest, res: NextApiResponse) => {
+  const { id } = req.query;
+
+  await db.connect();
+
+  const record = await Entry.findById(id);
+
+  if (!record) {
+    db.disconnect();
+    return res.status(400).json({ message: "This record doesnt exists" });
+  }
+
+  try {
+    const deleted = await Entry.findByIdAndDelete(id);
+
+    await db.disconnect();
+
+    if (!deleted) {
+      return res.status(400).json({ message: "Not found" });
+    }
+
+    res.status(200).json({
+      message: "Record deleted",
+    });
   } catch (err: any) {
     console.log({ err });
     const message: string = err.errors.status.message;

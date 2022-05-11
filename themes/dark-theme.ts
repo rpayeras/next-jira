@@ -8,7 +8,7 @@ export const darkTheme = createTheme({
       main: blue[300],
     },
     secondary: {
-      main: "#19857b",
+      main: "#19857B",
     },
     error: {
       main: red.A400,
@@ -21,7 +21,7 @@ export const darkTheme = createTheme({
       },
       styleOverrides: {
         root: {
-          backgroundColor: "#4a148c",
+          backgroundColor: "#FE5F55",
           position: "sticky",
         },
       },

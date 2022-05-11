@@ -1,12 +1,11 @@
 import { FC, useEffect, useReducer } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { useSnackbar } from "notistack";
 
 import { EntriesContext, entriesReducer, EntriesActionTypes } from "./";
 import { Entry } from "../../interfaces";
 
 import { entriesApi } from "../../apis";
-
-import { useSnackbar } from "notistack";
+import { useRouter } from "next/router";
 
 export interface EntriesState {
   entries: Entry[];
@@ -57,6 +56,35 @@ export const EntriesProvider: FC<EntriesProviderProps> = ({ children }) => {
     }
   };
 
+  const deleteEntry = async (_id: string) => {
+    try {
+      await entriesApi.delete(`/entries/${_id}`);
+
+      dispatch({ type: EntriesActionTypes.DELETE, payload: _id });
+
+      enqueueSnackbar("Entry deleted", {
+        variant: "success",
+        autoHideDuration: 1500,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
+        },
+      });
+
+      return true;
+    } catch (err) {
+      console.log(err);
+      enqueueSnackbar("Error with request, contact administrator", {
+        variant: "error",
+        autoHideDuration: 1500,
+        anchorOrigin: {
+          vertical: "top",
+          horizontal: "right",
+        },
+      });
+    }
+  };
+
   const refreshEntries = async () => {
     const { data } = await entriesApi.get<Entry[]>("/entries");
 
@@ -74,6 +102,7 @@ export const EntriesProvider: FC<EntriesProviderProps> = ({ children }) => {
         addNewEntry,
         toggleAddingEntry,
         updateEntry,
+        deleteEntry,
       }}
     >
       {children}
